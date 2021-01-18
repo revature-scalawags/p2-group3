@@ -22,6 +22,8 @@ object Main {
 
       //works cited: https://stackoverflow.com/questions/39255973/split-1-column-into-3-columns-in-spark-scala
       //prints out total count of trump hashtags
+      println("")
+      println("Total number of Donald Trump related hashtags")
       val countTrump: Unit = jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
         .select($"_tmp".getItem(0).as("col1"))
@@ -32,6 +34,7 @@ object Main {
         .show()
 
       //prints out count of hillary hashtags of all casing
+      println("Total number of Hillary Clinton related hashtags")
       val countClinton = jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
         .select($"_tmp".getItem(0).as("col1"))
