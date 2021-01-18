@@ -1,37 +1,84 @@
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Dataset, DataFrame, SparkSession}
+import org.apache.spark.sql.types.{StructType, StructField}
+import org.apache.spark.sql.types.{ArrayType, StringType}
 
-object Main {
-  def main(args: Array[String]) {
+/** Use this to test the app locally
+  * See compileScript.sh for details
+  */
+object HashtagsCountingLocalApp extends App {
+  val (inputFile, outputFile) = (args(0), args(1))
 
-    val spark = SparkSession
-      .builder()
-      .appName("count hashtags")
-      .master("local[*]")
-      .getOrCreate()
-    spark.sparkContext.setLogLevel("ERROR")
-    countHashtags(spark)
-    spark.stop()
+  val spark = SparkSession
+    .builder()
+    .appName("hashtag-counter")
+    .master("local[*]")
+    .getOrCreate()
 
-    def countHashtags(spark: SparkSession) {
-      import spark.implicits._
-      // val jsonfile = spark.read.option("multiline", "true").json("/datalake/00.json")
-      val jsonfile = spark.read.json("/datalake").cache()
-      // jsonfile.show()
-      // jsonfile.printSchema()
-      jsonfile
-        .filter(jsonfile("entities.hashtags.text").isNotNull)
-        .groupBy("entities.hashtags.text")
-        .count()
-        .sort($"count".desc)
-        .show(100, false)
+  spark.sparkContext.setLogLevel("WARN")
+  Runner.run(spark, inputFile, outputFile)
+  spark.stop()
+}
 
-      //TODO:parse out each wrappedarray word
-      //random fails..
-      // val hashTags = jsonfile.select("entities.hashtags.text").collect().flatMap(_.getAs[mutable.WrappedArray[String]](0))
-      // hashTags.foreach(println)
-      //https://stackoverflow.com/questions/57346978/spark-split-is-not-a-member-of-org-apache-spark-sql-row
+/** Use this when submitting the app to a cluster with spark-submit
+  */
+object HashtagsCountingApp extends App {
+  val (inputFile, outputFile) = (args(0), args(1))
 
-    }
+  // spark-submit command should supply all necessary config elements
+  val spark =
+    SparkSession.builder.appName("twitter-hashtag-counter").getOrCreate();
+  Runner.run(spark, inputFile, outputFile)
+}
+
+object Runner {
+  def run(spark: SparkSession, inputFile: String, outputFile: String): Unit = {
+    import spark.implicits._
+    val hashtagSchema = loadHashtagSchema();
+    val jsonDF =
+      spark.read
+        .format("json")
+        .schema(hashtagSchema)
+        .load(s"${inputFile}*")
+        .select(explode($"entities.hashtags.text") as "hashtags")
+        .cache()
+    // .write
+    // .format("parquet")
+    // .save(s"${outputFile}")
+
+    val sortedResults =
+      getTopHashtags(jsonDF).write.format("parquet").save(s"${outputFile}")
+
+    // val parquet =
+    //   spark.read
+    //     .format("parquet")
+    //     .load(s"${inputFile}*")
+    //     .sort(desc("count"))
+    //     .write
+    //     .format("csv")
+    //     .save(s"${outputFile}")
   }
+
+  def getTopHashtags(df: DataFrame): DataFrame = {
+    df.groupBy("hashtags")
+      .count()
+      .sort(desc("count"))
+  }
+
+  def loadHashtagSchema(): StructType = {
+    val hashtag = StructType(Array(StructField("text", StringType, false)))
+    val customSchema = StructType(
+      Array(
+        StructField(
+          "entities",
+          StructType(
+            Array(StructField("hashtags", ArrayType(hashtag, false), false))
+          ),
+          false
+        )
+      )
+    )
+    customSchema
+  }
+
 }
