@@ -24,15 +24,15 @@ object Main {
       //works cited: https://stackoverflow.com/questions/39255973/split-1-column-into-3-columns-in-spark-scala
       //prints out total count of trump hashtags
       println("")
-      // println("Total number of Donald Trump related hashtags")
-      // val countTrump: Unit = jsonfile
-      //   .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-      //   .select($"_tmp".getItem(0).as("col1"))
-      //   .groupBy(("col1"))
-      //   .count()
-      //   .filter(lower($"col1") === "trump" || lower($"col1") === "donald")
-      //   .agg(sum($"count"))
-      //   .show()
+      println("Total number of Donald Trump related hashtags")
+      val countTrump: Unit = jsonfile
+        .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
+        .select($"_tmp".getItem(0).as("col1"))
+        .groupBy(("col1"))
+        .count()
+        .filter(lower($"col1") === "trump" || lower($"col1") === "donald")
+        .agg(sum($"count"))
+        .show()
 
       //prints out count of hillary hashtags of all casing
       println("Total number of Hillary Clinton related hashtags")
@@ -45,6 +45,7 @@ object Main {
         .agg(sum($"count"))
         .show()
 
+    //prints out inidivdual counts
       jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
         .select($"_tmp".getItem(0).as("col1"))
@@ -58,13 +59,4 @@ object Main {
   }
 }
 
-//prints out inidivdual counts
-// val countClinton = jsonfile
-//   .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-//   .select($"_tmp".getItem(0).as("col1"))
-//   .groupBy(("col1"))
-//   .count()
-//   .sort($"count".desc)
-//   .filter(lower($"col1") === "hillary" || lower($"col1") === "clinton")
-//   .show()
 
