@@ -3,7 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=scala,sbt,visualstudiocode,metals
 
 ### Metals ###
-.metals/
+.metals/*
 .bloop/
 project/**/metals.sbt
 
