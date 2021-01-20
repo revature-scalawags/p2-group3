@@ -54,18 +54,21 @@ object PopularHashtags {
     val hashtags = tweetwords.filter(word => word.startsWith("#"))
     
     // Map each hashtag to a key/value pair of (hashtag, 1) so we can count them up by adding up the values
-    val hashtagKeyValues = hashtags.map(hashtag => (hashtag, 1))
+    // val hashtagKeyValues = hashtags.map(hashtag => (hashtag, 1))
+    val hashtagKeyLowercase = hashtags
+      .map(hashtag => hashtag.toLowerCase())
+      .filter(hashtag => hashtag.contains("#trump") || hashtag.contains("#biden"))
+      .map(hashtag => (hashtag, 1))
     
-    // Now count them up over a 5 minute window sliding every one second
-    val hashtagCounts = hashtagKeyValues.reduceByKeyAndWindow( (x,y) => x + y, (x,y) => x - y, Seconds(300), Seconds(1))
-    //  You will often see this written in the following shorthand:
-    //val hashtagCounts = hashtagKeyValues.reduceByKeyAndWindow( _ + _, _ -_, Seconds(300), Seconds(1))
-    
+    // Countover a 5 minute window sliding every one second
+    val hashtagCounts = hashtagKeyLowercase.reduceByKeyAndWindow( (x,y) => x + y, (x,y) => x - y, Seconds(300), Seconds(1))
+
     // Sort the results by the count values
-    val sortedResults = hashtagCounts.transform(rdd => rdd.sortBy(x => x._2, ascending = false))
+    val countResults = hashtagCounts.transform(rdd => rdd.sortBy(x => x._2, ascending = false))
     
-    // Print the top 10
-    sortedResults.print
+    // Print results
+    countResults.print
+    
     
     // Set a checkpoint directory, and kick it all off
     // change checkpoint directory based on os file system
