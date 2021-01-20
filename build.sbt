@@ -1,5 +1,5 @@
 scalaVersion := "2.12.10"
-name := "twitter-hashtags"
+name := "top-hashtags"
 organization := "ch.epfl.scala"
 version := "1.0"
 mainClass in (Compile, run) := Some("src.main.scala.HashtagsCountingApp")

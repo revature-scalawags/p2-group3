@@ -42,32 +42,19 @@ object Runner {
         .load(s"${inputFile}*")
         .select(explode($"entities.hashtags.text") as "hashtags")
         .cache()
-    // .write
-    // .format("parquet")
-    // .save(s"${outputFile}")
 
     val sortedResults =
-      getTopHashtags(jsonDF).write.format("parquet").save(s"${outputFile}")
-
-    // val parquet =
-    //   spark.read
-    //     .format("parquet")
-    //     .load(s"${inputFile}*")
-    //     .sort(desc("count"))
-    //     .write
-    //     .format("csv")
-    //     .save(s"${outputFile}")
+      getTopNHashtags(jsonDF, 20).write
+        .format("parquet")
+        .save(s"${outputFile}/topHashtags")
   }
 
-  def getTopHashtags(df: DataFrame): DataFrame = {
+  def getTopNHashtags(df: DataFrame, topN: Int): DataFrame = {
     df.groupBy("hashtags")
       .count()
       .sort(desc("count"))
+      .limit(topN)
   }
-
-  // def searchHashtag(hashtag: String, df: DataFrame): Seq[String] {
-
-  // }
 
   def loadHashtagSchema(): StructType = {
     val hashtag = StructType(Array(StructField("text", StringType, false)))
