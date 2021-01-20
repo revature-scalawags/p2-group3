@@ -1,6 +1,7 @@
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.twitter._
 
+//Reference "Apache Spark with Scala - Hands On with Big Data!" Course by Frank Kane 
 /** Listens to a stream of Tweets and keeps track of the most popular
  *  hashtags over a 5 minute window.
  */
@@ -67,7 +68,7 @@ object PopularHashtags {
     sortedResults.print
     
     // Set a checkpoint directory, and kick it all off
-    // I could watch this all day!
+    // change checkpoint directory based on os file system
     ssc.checkpoint("C:/checkpoint/")
     ssc.start()
     ssc.awaitTermination()
