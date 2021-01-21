@@ -38,4 +38,3 @@ project/plugins/project/
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/scala,sbt,visualstudiocode,metals
-compileScript.sh
