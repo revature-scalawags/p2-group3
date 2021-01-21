@@ -1,12 +1,12 @@
 # Project 2 - Comparing Political Leader Mentions on Twitter
 
 ## Dependencies
->using https://github.com/big-data-europe/docker-spark
->Historical data retrieved from: https://archive.org/details/archiveteam-twitter-stream-2016-11
+> using https://github.com/big-data-europe/docker-spark
+> Historical data retrieved from: https://archive.org/details/archiveteam-twitter-stream-2016-11
 
 ## Run
->For historical batch analysis: run scripts in individual date folders
->For streaming results: sbt run
+> For historical batch analysis: run scripts in individual date folders
+> For streaming results: sbt run
 
 # Features
 - Historical Batch Twitter Analysis
