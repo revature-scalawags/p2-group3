@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+sbt package
+docker cp target/scala-2.12/hello-world_2.12-1.0.jar spark-master:/tmp/hello-world.jar
+docker exec spark-master bash -c "./spark/bin/spark-submit --class "Main" --master local[*] /tmp/hello-world.jar"
