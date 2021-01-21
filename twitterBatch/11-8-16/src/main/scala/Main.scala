@@ -16,8 +16,8 @@ object Main {
     def countHashtags(spark: SparkSession) {
       import spark.implicits._
       // val jsonfile = spark.read.option("multiline", "true").json("/datalake/00.json")
-      // val jsonfile = spark.read.json("/datalake/*/*bz2").cache()
-      val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
+      val jsonfile = spark.read.json("/datalake/*/*bz2").cache()
+      // val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
       // jsonfile.show()
       // jsonfile.printSchema()
 
