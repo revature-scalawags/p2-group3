@@ -17,7 +17,7 @@ object Main {
       import spark.implicits._
       // val jsonfile = spark.read.option("multiline", "true").json("/datalake/00.json")
       val jsonfile = spark.read.json("/datalake/*/*bz2").cache()
-      // val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
+      //val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
       // jsonfile.show()
       // jsonfile.printSchema()
 
@@ -27,32 +27,42 @@ object Main {
       println("Total number of Donald Trump related hashtags")
       val countTrump: Unit = jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("col1"))
-        .groupBy(("col1"))
+        .select($"_tmp".getItem(0).as("trumpCount"))
+        .groupBy(("trumpCount"))
         .count()
-        .filter(lower($"col1") === "trump" || lower($"col1") === "donald")
+        .filter(lower($"trumpCount").contains("trump") || lower($"trumpCount").contains("donald"))
         .agg(sum($"count"))
+        .show()
+
+      //prints out individual trump related mentions
+      jsonfile
+        .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
+        .select($"_tmp".getItem(0).as("trumpCount"))
+        .groupBy(("trumpCount"))
+        .count()
+        .sort($"count".desc)
+        .filter(lower($"trumpCount").contains("trump") || lower($"trumpCount").contains("donald"))
         .show()
 
       //prints out count of hillary hashtags of all casing
       println("Total number of Hillary Clinton related hashtags")
       val countClinton = jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("col1"))
-        .groupBy(("col1"))
+        .select($"_tmp".getItem(0).as("clintonCount"))
+        .groupBy(("clintonCount"))
         .count()
-        .filter(lower($"col1") === "hillary" || lower($"col1") === "clinton")
+        .filter(lower($"clintonCount").contains("hillary") || lower($"clintonCount").contains("clinton"))
         .agg(sum($"count"))
         .show()
 
     //prints out inidivdual counts
       jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("col1"))
-        .groupBy(("col1"))
+        .select($"_tmp".getItem(0).as("clintonCount"))
+        .groupBy(("clintonCount"))
         .count()
         .sort($"count".desc)
-        .filter(lower($"col1") === "hillary" || lower($"col1") === "clinton")
+        .filter(lower($"clintonCount").contains("hillary") || lower($"clintonCount").contains("clinton"))
         .show()
 
     }
