@@ -21,7 +21,6 @@
 - Apache Spark
 - Spark SQL
 - Spark Streaming (DStreams)
-- YARN
 - Scala
 - Git with Github
 - Well documented 
