@@ -21,7 +21,7 @@ project/plugins/project/
 .cache
 .lib/
 .bsp
-
+keys.sh
 ### Scala ###
 *.class
 *.log
