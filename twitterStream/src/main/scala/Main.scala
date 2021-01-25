@@ -43,27 +43,23 @@ object PopularHashtags {
 
     // Create a DStream from Twitter using our streaming context
     val tweets = TwitterUtils.createStream(ssc, None)
-    
+
+    // Twitter API limits random 1% of total real time tweets
     // Now extract the text of each status update into DStreams using map()
     val statuses = tweets.map(status => status.getText)
-    
-    // Blow out each word into a new DStream
+    // Separate out each word
     val tweetwords = statuses.flatMap(tweetText => tweetText.split(" "))
-    
     // Now eliminate anything that's not a hashtag
-    val hashtags = tweetwords.filter(word => word.startsWith("#"))
-    
+    val hashtags = tweetwords.filter(word => word.startsWith("#")).flatMap(tweetText => tweetText.split(" "))
     // Map each hashtag to a key/value pair of (hashtag, 1) so we can count them up by adding up the values
-    // val hashtagKeyValues = hashtags.map(hashtag => (hashtag, 1))
     val hashtagKeyLowercase = hashtags
       .map(hashtag => hashtag.toLowerCase())
-      .filter(hashtag => hashtag.contains("#trump") || hashtag.contains("#biden"))
+      .filter(hashtag => hashtag.contains("trump") || hashtag.contains("biden"))
       .map(hashtag => (hashtag, 1))
     
-    // Countover a 5 minute window sliding every one second
-    val hashtagCounts = hashtagKeyLowercase.reduceByKeyAndWindow( (x,y) => x + y, (x,y) => x - y, Seconds(300), Seconds(1))
-
-    // Sort the results by the count values
+    // Reduce last 30 seconds of data, every second
+    val hashtagCounts = hashtagKeyLowercase.reduceByKeyAndWindow( (x,y) => x + y, (x,y) => x + y, Seconds(30), Seconds(1))
+    // Sort based on count
     val countResults = hashtagCounts.transform(rdd => rdd.sortBy(x => x._2, ascending = false))
     
     // Print results
