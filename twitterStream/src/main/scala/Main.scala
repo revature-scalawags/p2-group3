@@ -38,7 +38,7 @@ object PopularHashtags {
     // all CPU cores and one-second batches of data
     val ssc = new StreamingContext("local[*]", "PopularHashtags", Seconds(1))
     
-    // Get rid of log spam (should be called after the context is set up)
+    // Get rid of log spam
     setupLogging()
 
     // Create a DStream from Twitter using our streaming context
@@ -49,12 +49,16 @@ object PopularHashtags {
     val statuses = tweets.map(status => status.getText)
     // Separate out each word
     val tweetwords = statuses.flatMap(tweetText => tweetText.split(" "))
-    // Now eliminate anything that's not a hashtag
-    val hashtags = tweetwords.filter(word => word.startsWith("#")).flatMap(tweetText => tweetText.split(" "))
+    // Now eliminate anything that's not a hashtag and handle non-spaced hashtags
+    val hashtags = tweetwords.filter(word => word.startsWith("#")).flatMap(tweetText => tweetText.split("#"))
     // Map each hashtag to a key/value pair of (hashtag, 1) so we can count them up by adding up the values
+    //maybe exclude donald and joe as they are more common first names
     val hashtagKeyLowercase = hashtags
       .map(hashtag => hashtag.toLowerCase())
-      .filter(hashtag => hashtag.contains("trump") || hashtag.contains("biden"))
+      .filter(hashtag => hashtag.contains("donald") || 
+        hashtag.contains("trump") || 
+        hashtag.contains("joe") || 
+        hashtag.contains("biden"))
       .map(hashtag => (hashtag, 1))
     
     // Reduce last 30 seconds of data, every second
@@ -65,8 +69,8 @@ object PopularHashtags {
     // Print results
     countResults.print
     
-    
-    // Set a checkpoint directory, and kick it all off
+    // Set a checkpoint directory for reduceByKeyAndWindow functionality
+    // filling usage of stateful transformations requirement 
     // change checkpoint directory based on os file system
     ssc.checkpoint("C:/checkpoint/")
     ssc.start()
