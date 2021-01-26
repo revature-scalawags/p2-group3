@@ -8,13 +8,17 @@
 ## Run
 >1. Copy bz2 twitter archive files into docker: spark-master:/datalake/
 >- Retreived from https://archive.org/details/archiveteam-twitter-stream-2016-11
->2. in bash: ./compileScript.sh
+>2. in src\main\scala\Main.Scala lines 20 to 23 uncomment desired query
+>- 4 different method queries available: 
+    >- countHashtagsTrump, showHashtagsTrump, countHashtagsClinton, showHashtagsClinton
+>- One query must be ran at a time to avoid OutofMemoryError: Java Heap Space
+>3. in bash: ./compileScript.sh
 
 # Features
 - Counts total number of hashtag occurances for date 11-8-2016
     - Counts all Donald Trump tweets
     - Counts all Hillary Clinton tweets
-- Shows table of all hashtag occurances by differnt casing 
+- Shows contents of all hashtag occurances by different casing 
 
 # Technologies
 - Apache Spark

@@ -12,15 +12,21 @@ object Main {
       .master("local[2]")
       .getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
-    countHashtags(spark,inputFile)
+
+    val jsonfile =
+      // val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
+      spark.read.option("recursiveFileLookup", true).json(s"$inputFile").cache()
+
+    countHashtagsTrump(spark, inputFile)
+    // showHashtagsTrump(spark, inputFile)
+    // countHashtagsClinton(spark, inputFile)
+    // showHashtagsClinton(spark, inputFile)
+
     spark.stop()
 
-    def countHashtags(spark: SparkSession, inputFile: String) {
+    def countHashtagsTrump(spark: SparkSession, inputFile: String) {
       import spark.implicits._
-      
-      // val jsonfile = spark.read.option("multiline", "true").json("/datalake/00.json")
-      val jsonfile = spark.read.option("recursiveFileLookup",true).json(s"$inputFile").cache()
-      // val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
+
       // jsonfile.show()
       // jsonfile.printSchema()
 
@@ -33,43 +39,70 @@ object Main {
         .select($"_tmp".getItem(0).as("trumpCount"))
         .groupBy(("trumpCount"))
         .count()
-        .filter(lower($"trumpCount").contains("trump") || lower($"trumpCount").contains("donald"))
+        .filter(
+          lower($"trumpCount").contains("trump") || lower($"trumpCount")
+            .contains("donald")
+        )
         .agg(sum($"count"))
         .show()
+    }
 
-      //prints out individual trump related mentions
+    def showHashtagsTrump(spark: SparkSession, inputFile: String) {
+      import spark.implicits._
+
+      println("")
+      //prints out contents of Trump hashtags of all casing
+      println("Top 20 mentions of Trump")
       jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
         .select($"_tmp".getItem(0).as("trumpCount"))
         .groupBy(("trumpCount"))
         .count()
         .sort($"count".desc)
-        .filter(lower($"trumpCount").contains("trump") || lower($"trumpCount").contains("donald"))
+        .filter(
+          lower($"trumpCount").contains("trump") || lower($"trumpCount")
+            .contains("donald")
+        )
         .show()
+    }
 
-      //prints out count of hillary hashtags of all casing
+    def countHashtagsClinton(spark: SparkSession, inputFile: String) {
+      import spark.implicits._
+
+      println("")
+      //prints out total count of Clinton hashtags
       println("Total number of Hillary Clinton related hashtags")
       val countClinton = jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
         .select($"_tmp".getItem(0).as("clintonCount"))
         .groupBy(("clintonCount"))
         .count()
-        .filter(lower($"clintonCount").contains("hillary") || lower($"clintonCount").contains("clinton"))
+        .filter(
+          lower($"clintonCount").contains("hillary") || lower($"clintonCount")
+            .contains("clinton")
+        )
         .agg(sum($"count"))
         .show()
+    }
 
-    //prints out inidivdual counts
+    def showHashtagsClinton(spark: SparkSession, inputFile: String) {
+      import spark.implicits._
+
+      println("")
+      //prints out count of contents hashtags of all casing
+      println("Top 20 mentions of Clinton")
       jsonfile
         .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
         .select($"_tmp".getItem(0).as("clintonCount"))
         .groupBy(("clintonCount"))
         .count()
         .sort($"count".desc)
-        .filter(lower($"clintonCount").contains("hillary") || lower($"clintonCount").contains("clinton"))
+        .filter(
+          lower($"clintonCount").contains("hillary") || lower($"clintonCount")
+            .contains("clinton")
+        )
         .show()
-
     }
+
   }
 }
-
-
