@@ -4,20 +4,23 @@ import org.apache.spark.sql.functions._
 object Main {
   def main(args: Array[String]) {
 
+    val inputFile = args(0)
+
     val spark = SparkSession
       .builder()
       .appName("count hashtags")
       .master("local[2]")
       .getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
-    countHashtags(spark)
+    countHashtags(spark,inputFile)
     spark.stop()
 
-    def countHashtags(spark: SparkSession) {
+    def countHashtags(spark: SparkSession, inputFile: String) {
       import spark.implicits._
+      
       // val jsonfile = spark.read.option("multiline", "true").json("/datalake/00.json")
-      val jsonfile = spark.read.json("/datalake/*/*bz2").cache()
-      //val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
+      val jsonfile = spark.read.option("recursiveFileLookup",true).json(s"$inputFile").cache()
+      // val jsonfile = spark.read.json("/datalake/00/*bz2").cache()
       // jsonfile.show()
       // jsonfile.printSchema()
 
