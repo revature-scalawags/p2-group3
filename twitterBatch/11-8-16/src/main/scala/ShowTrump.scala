@@ -28,16 +28,17 @@ object ShowTrump {
       //prints out contents of Trump hashtags of all casing
       println("Top 20 mentions of Trump")
       jsonfile
-        .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("trumpCount"))
-        .groupBy(("trumpCount"))
+        .select($"entities.hashtags.text".as("trumpCount"))
+        .withColumn("Trump Mentions", concat_ws(",", $"trumpCount"))
+        .drop($"trumpCount")
+        .groupBy($"Trump Mentions")
         .count()
         .sort($"count".desc)
         .filter(
-          lower($"trumpCount").contains("trump") || lower($"trumpCount")
+          lower($"Trump Mentions").contains("trump") || lower($"Trump Mentions")
             .contains("donald")
         )
-        .show()
+        .show(false)
     }
   }
 }

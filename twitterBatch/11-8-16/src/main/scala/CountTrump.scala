@@ -1,5 +1,6 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.sources
 
 object CountTrump {
   def main(args: Array[String]) {
@@ -18,7 +19,7 @@ object CountTrump {
       spark.read.option("recursiveFileLookup", true).json(s"$inputFile").cache()
 
     countHashtagsTrump(spark, inputFile)
-    
+
     spark.stop()
 
     def countHashtagsTrump(spark: SparkSession, inputFile: String) {
@@ -27,17 +28,17 @@ object CountTrump {
       // jsonfile.show()
       // jsonfile.printSchema()
 
-      //works cited: https://stackoverflow.com/questions/39255973/split-1-column-into-3-columns-in-spark-scala
       //prints out total count of trump hashtags
       println("")
-      println("Total number of Donald Trump related hashtags")
-      val countTrump: Unit = jsonfile
-        .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("trumpCount"))
-        .groupBy(("trumpCount"))
+//https://stackoverflow.com/questions/44792616/how-to-convert-array-of-strings-to-string-column
+      jsonfile
+        .select($"entities.hashtags.text".as("trumpCount"))
+        .withColumn("concatString", concat_ws(",", $"trumpCount"))
+        .drop($"trumpCount")
+        .groupBy($"concatString")
         .count()
         .filter(
-          lower($"trumpCount").contains("trump") || lower($"trumpCount")
+          lower($"concatString").contains("trump") || lower($"concatString")
             .contains("donald")
         )
         .agg(sum($"count"))

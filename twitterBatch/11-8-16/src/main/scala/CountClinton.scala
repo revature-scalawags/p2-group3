@@ -27,13 +27,14 @@ object CountClinton {
       println("")
       //prints out total count of Clinton hashtags
       println("Total number of Hillary Clinton related hashtags")
-      val countClinton = jsonfile
-        .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("clintonCount"))
-        .groupBy(("clintonCount"))
+      jsonfile
+        .select($"entities.hashtags.text".as("clintonCount"))
+        .withColumn("concatString", concat_ws(",", $"clintonCount"))
+        .drop($"clintonCount")
+        .groupBy($"concatString")
         .count()
         .filter(
-          lower($"clintonCount").contains("hillary") || lower($"clintonCount")
+          lower($"concatString").contains("hillary") || lower($"concatString")
             .contains("clinton")
         )
         .agg(sum($"count"))

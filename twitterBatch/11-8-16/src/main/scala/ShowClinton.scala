@@ -28,16 +28,17 @@ object ShowClinton {
       //prints out count of contents hashtags of all casing
       println("Top 20 mentions of Clinton")
       jsonfile
-        .withColumn("_tmp", split($"entities.hashtags.text".getItem(0), "\\,"))
-        .select($"_tmp".getItem(0).as("clintonCount"))
-        .groupBy(("clintonCount"))
+        .select($"entities.hashtags.text".as("clintonCount"))
+        .withColumn("Clinton Mentions", concat_ws(",", $"clintonCount"))
+        .drop($"clintonCount")
+        .groupBy($"Clinton Mentions")
         .count()
         .sort($"count".desc)
         .filter(
-          lower($"clintonCount").contains("hillary") || lower($"clintonCount")
+          lower($"Clinton Mentions").contains("hillary") || lower($"Clinton Mentions")
             .contains("clinton")
         )
-        .show()
+        .show(false)
     }
 
   }
