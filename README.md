@@ -25,7 +25,7 @@
 
 - Clone repository:
 
-  > git clone https://github.com/PorkodiVenkatesh/PROJECT-NAME.git
+  > git clone https://github.com/revature-scalawags/p2-group3.git
 
 - Spark cluster setup on docker: (optional):  
   https://github.com/big-data-europe/docker-spark
