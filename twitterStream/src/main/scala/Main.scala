@@ -1,10 +1,9 @@
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.twitter._
 
-//Reference "Apache Spark with Scala - Hands On with Big Data!" Course by Frank Kane 
-/** Listens to a stream of Tweets and keeps track of the most popular
- *  hashtags over a 5 minute window.
- */
+//References:tw "Apache Spark with Scala - Hands On with Big Data!" Course by Frank Kane 
+//http://twitter4j.org/en/code-examples.html
+//https://stackoverflow.com/questions/9997292/how-to-read-environment-variables-in-scala
 object PopularHashtags {
   
     /** Makes sure only ERROR messages get logged to avoid log spam. */
@@ -14,26 +13,23 @@ object PopularHashtags {
     rootLogger.setLevel(Level.ERROR)   
   }
   
-  /** Configures Twitter service credentials using twitter.txt in the main workspace directory */
+  /** Configures Twitter service credentials with environment variables */
   def setupTwitter(): Unit = {
-    import scala.io.Source
+    val consumer_Key = sys.env("twitterConsumerKey")
+    val consumer_Secret = sys.env("twitterConsumerSecret")
+    val access_Token = sys.env("twitterAccessToken")
+    val access_Secret = sys.env("twitterAccessSecret")
 
-    val lines = Source.fromFile("twitter.txt")
-    for (line <- lines.getLines) {
-      val fields = line.split(" ")
-      if (fields.length == 2) {
-        System.setProperty("twitter4j.oauth." + fields(0), fields(1))
-      }
-    }
-    lines.close()
+    System.setProperty("twitter4j.oauth.consumerKey", consumer_Key)
+    System.setProperty("twitter4j.oauth.consumerSecret", consumer_Secret)
+    System.setProperty("twitter4j.oauth.accessToken", access_Token)
+    System.setProperty("twitter4j.oauth.accessTokenSecret", access_Secret)
   }
 
-  /** Our main function where the action happens */
   def main(args: Array[String]) {
 
-    // Configure Twitter credentials using twitter.txt
     setupTwitter()
-    
+
     // Set up a Spark streaming context named "PopularHashtags" that runs locally using
     // all CPU cores and one-second batches of data
     val ssc = new StreamingContext("local[*]", "PopularHashtags", Seconds(1))
@@ -41,10 +37,10 @@ object PopularHashtags {
     // Get rid of log spam
     setupLogging()
 
-    // Create a DStream from Twitter using our streaming context
+    // Create a DStream from Twitter using our streaming context that returns tweets
+    // Twitter API limits random 1% of total real time tweets
     val tweets = TwitterUtils.createStream(ssc, None)
 
-    // Twitter API limits random 1% of total real time tweets
     // Now extract the text of each status update into DStreams using map()
     val statuses = tweets.map(status => status.getText)
     // Separate out each word
