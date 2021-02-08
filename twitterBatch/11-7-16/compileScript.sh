@@ -5,7 +5,7 @@ sbt package
 #create seperate file "keys.sh" with env vars to store aws keys
 #create both env vars in file
 #example: export AWS_ACCESS_KEY_ID=yourkeyhere
-source keys.sh
+#source keys.sh
 
 # 1)download two jar files: 
 # a) aws-java-sdk-bundle-1.11.375.jar

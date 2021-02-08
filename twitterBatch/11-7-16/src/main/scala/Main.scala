@@ -2,7 +2,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, DataFrame, SparkSession}
 import org.apache.spark.sql.types.{StructType, StructField}
 import org.apache.spark.sql.types.{ArrayType, StringType}
-import org.apache.hadoop.fs.s3a.S3AFileSystem
 
 /** Use this to test the app locally
   * See compileScript.sh for details
@@ -22,39 +21,36 @@ object HashtagsCountingLocalApp extends App {
   spark.stop()
 }
 object Runner {
-  def run(spark: SparkSession): Unit = {
-    // def run(spark: SparkSession, inputFile: String, outputFile: String): Unit = {
+
+  def run(spark: SparkSession, inputFile: String, outputFile: String): Unit = {
     import spark.implicits._
 
     val hashtagSchema = loadHashtagSchema();
-    val accessKeyId = System.getenv("AWS_ACCESS_KEY_ID")
-    val secretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY")
+    // val accessKeyId = System.getenv("AWS_ACCESS_KEY_ID")
+    // val secretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY")
+    // val s3Endpoint = "s3a://com.revature.scalawags.group3"
 
-    spark.sparkContext.hadoopConfiguration
-      .set("fs.s3n.awsAccessKeyid", accessKeyId)
-    spark.sparkContext.hadoopConfiguration
-      .set("fs.s3n.awsSecretAccessKey", secretAccessKey)
+    // spark.sparkContext.hadoopConfiguration
+    //   .set("fs.s3n.awsAccessKeyid", accessKeyId)
+    // spark.sparkContext.hadoopConfiguration
+    //   .set("fs.s3n.awsSecretAccessKey", secretAccessKey)
 
-    // val jsonDF =
-    //   spark.read
-    //     .format("json")
-    //     .schema(hashtagSchema)
-    //     .load(s"${inputFile}*")
-    //     .select(explode($"entities.hashtags.text") as "hashtags")
-    // .cache()
+    val jsonDF =
+      spark.read
+        .format("json")
+        .schema(hashtagSchema)
+        .load(s"${inputFile}*")
+        .select(explode($"entities.hashtags.text") as "hashtags")
+        .cache()
 
-    //jsonDF.printSchema()
+    // val parqDF = spark.read.parquet(
+    //   s"$s3Endpoint.datalake/top20hashtags.snappy.parquet"
+    // )
 
-    val parqDF = spark.read.parquet(
-      "s3a://com.revature.scalawags.group3.datalake/top20hashtags.snappy.parquet"
-    )
-
-    parqDF.show()
-
-    // val sortedResults =
-    //   getTopNHashtags(jsonDF, 20).write
-    //     .format("parquet")
-    //     .save(s"${outputFile}/topHashtags")
+    val sortedResults =
+      getTopNHashtags(jsonDF, 20).write
+        .format("parquet")
+        .save(s"${outputFile}/topHashtags")
   }
 
   def getTopNHashtags(df: DataFrame, topN: Int): DataFrame = {

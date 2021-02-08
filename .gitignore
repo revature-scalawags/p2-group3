@@ -28,6 +28,7 @@ keys.sh
 *.class
 *.log
 .scalafmt.conf
+build.properties
 
 ### VisualStudioCode ###
 .vscode/*
