@@ -55,3 +55,4 @@ For streaming results:
 - [Myung Jin Song](https://github.com/jsong220)
 - [Michael Tsoumpariotis](https://github.com/MichaelT950)
 - [Bryant Singh](https://github.com/brysingh76)
+- [Edward Rodriguez](https://github.com/Edward-Rodriguez)
