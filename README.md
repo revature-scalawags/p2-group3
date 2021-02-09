@@ -56,3 +56,7 @@ For streaming results:
 - [Michael Tsoumpariotis](https://github.com/MichaelT950)
 - [Bryant Singh](https://github.com/brysingh76)
 - [Edward Rodriguez](https://github.com/Edward-Rodriguez)
+
+## License
+
+[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
